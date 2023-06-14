@@ -1,5 +1,6 @@
 package ru.turbogoose.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +13,6 @@ public class PostDto {
     private String title;
     private String description;
     private String content;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime expires;
 }

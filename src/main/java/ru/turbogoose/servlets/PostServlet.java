@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dto.*;
-import ru.turbogoose.exceptions.PostNotExistsException;
+import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.services.PostService;
 
 import java.io.Writer;
@@ -23,6 +23,7 @@ public class PostServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        // TODO: add constraint validation
         String id = extractId(req.getPathInfo());
         try (Writer writer = resp.getWriter()) {
             resp.setContentType("application/json");
@@ -30,7 +31,7 @@ public class PostServlet extends HttpServlet {
                 PostDto postDto = postService.getPost(id);
                 objectMapper.writeValue(writer, postDto);
                 resp.setStatus(200);
-            } catch (PostNotExistsException | JacksonException exc) {
+            } catch (PostNotFoundException | JacksonException exc) {
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(404);
             }
@@ -74,7 +75,7 @@ public class PostServlet extends HttpServlet {
                 RenewedPostDto renewedPostDto = postService.renewPost(id, renewDto);
                 objectMapper.writeValue(writer, renewedPostDto);
                 resp.setStatus(200);
-            } catch (PostNotExistsException | JacksonException exc) {
+            } catch (PostNotFoundException | JacksonException exc) {
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(404);
             }
