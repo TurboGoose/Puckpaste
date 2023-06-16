@@ -1,4 +1,4 @@
-package ru.turbogoose.domain;
+package ru.turbogoose.models;
 
 import lombok.Builder;
 import lombok.Data;
@@ -16,17 +16,17 @@ public class Post {
     private String description = "";
     private String content;
     @Builder.Default
-    private LocalDateTime expires = LocalDateTime.now().plusDays(7);
+    private LocalDateTime expiresAt = LocalDateTime.now().plusDays(7);
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime lastRenewedAt;
 
     public LocalDateTime renew(Duration duration) {
-        LocalDateTime updatedTimeToLive = expires.plus(duration);
-        if (updatedTimeToLive.isAfter(expires)) {
+        LocalDateTime updatedTimeToLive = expiresAt.plus(duration);
+        if (updatedTimeToLive.isAfter(expiresAt)) {
             lastRenewedAt = LocalDateTime.now();
-            expires = updatedTimeToLive;
+            expiresAt = updatedTimeToLive;
         }
-        return expires;
+        return expiresAt;
     }
 }

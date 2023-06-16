@@ -1,6 +1,6 @@
 package ru.turbogoose.utils;
 
-import ru.turbogoose.domain.Post;
+import ru.turbogoose.models.Post;
 
 public class LinkGenerator {
     public String getLink(Post post) {

@@ -1,6 +1,6 @@
 package ru.turbogoose.mappers;
 
-import ru.turbogoose.domain.Post;
+import ru.turbogoose.models.Post;
 import ru.turbogoose.dto.CreateDto;
 import ru.turbogoose.dto.PostDto;
 
@@ -13,7 +13,7 @@ public class PostMapper {
                 .title(post.getTitle())
                 .description(post.getDescription())
                 .content(post.getContent())
-                .expires(post.getExpires())
+                .expiresAt(post.getExpiresAt())
                 .build();
     }
 
@@ -22,7 +22,7 @@ public class PostMapper {
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .content(dto.getContent())
-                .expires(LocalDateTime.now().plusDays(dto.getExpirationInDays()))
+                .expiresAt(LocalDateTime.now().plusDays(dto.getExpirationInDays()))
                 .build();
     }
 }
