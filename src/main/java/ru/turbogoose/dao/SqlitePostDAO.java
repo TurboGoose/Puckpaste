@@ -7,16 +7,19 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class SqlitePostDAO implements PostDao {
-    private static final String URL = "jdbc:sqlite:/Users/ilakonovalov/Sqlite/puckpaste.db";
-    // read it from properties or mb inject? Because same format used in models and dtos
+public class SqlitePostDAO implements PostDAO {
+    // TODO: rewrite to import from Properties
+    private final String url;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
+    public SqlitePostDAO(String url) {
+        this.url = url;
+    }
 
     @Override
     public Post getById(long id) throws PostNotFoundException {
         String sql = "SELECT * FROM posts WHERE id=?;";
-        try (Connection conn = DriverManager.getConnection(URL);
+        try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
 
@@ -42,7 +45,7 @@ public class SqlitePostDAO implements PostDao {
     @Override
     public long save(Post post) {
         String sql = "INSERT INTO posts(title, description, content, expires_at, created_at) values (?, ?, ?, ?, ?);";
-        try (Connection conn = DriverManager.getConnection(URL);
+        try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, post.getTitle());
@@ -73,7 +76,7 @@ public class SqlitePostDAO implements PostDao {
     @Override
     public boolean update(Post post) {
         String sql = "UPDATE posts SET title=?, description=?, content=?, expires_at=?, created_at=? WHERE id=?;";
-        try (Connection conn = DriverManager.getConnection(URL);
+        try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, post.getTitle());
@@ -93,7 +96,7 @@ public class SqlitePostDAO implements PostDao {
     @Override
     public void delete(long id) {
         String sql = "DELETE FROM posts WHERE id=?;";
-        try (Connection conn = DriverManager.getConnection(URL);
+        try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             ps.executeUpdate();
