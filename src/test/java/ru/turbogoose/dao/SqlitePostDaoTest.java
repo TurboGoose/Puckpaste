@@ -10,10 +10,10 @@ import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PostDaoTest {
+class SqlitePostDaoTest {
     @Test
     public void testDAO() throws PostNotFoundException {
-        PostDao dao = new PostDao();
+        PostDao dao = new SqlitePostDAO();
 
         Post post = Post.builder()
                 .title("Title")
