@@ -62,26 +62,5 @@ public class PostServlet extends HttpServlet {
             throwable.printStackTrace();
             resp.setStatus(500);
         }
-
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
-        String id = extractId(req.getPathInfo());
-        try (Writer writer = resp.getWriter()) {
-            resp.setContentType("application/json");
-            try {
-                RenewDto renewDto = objectMapper.readValue(req.getReader(), RenewDto.class);
-                RenewedPostDto renewedPostDto = postService.renewPost(id, renewDto);
-                objectMapper.writeValue(writer, renewedPostDto);
-                resp.setStatus(200);
-            } catch (PostNotFoundException | JacksonException exc) {
-                objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
-                resp.setStatus(404);
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            resp.setStatus(500);
-        }
     }
 }

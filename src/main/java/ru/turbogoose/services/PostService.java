@@ -11,8 +11,4 @@ public class PostService {
     public PostDto getPost(String id) throws PostNotFoundException {
         return null;
     }
-
-    public RenewedPostDto renewPost(String id, RenewDto renewDto) throws PostNotFoundException {
-        return null;
-    }
 }

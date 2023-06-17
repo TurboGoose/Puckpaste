@@ -32,7 +32,6 @@ public class SqlitePostDAO implements PostDao {
             post.setContent(rs.getString("content"));
             post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), formatter));
             post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), formatter));
-            post.setLastRenewedAt(LocalDateTime.parse(rs.getString("last_renewed_at"), formatter));
             return post;
 
         } catch (SQLException e) {
@@ -42,8 +41,7 @@ public class SqlitePostDAO implements PostDao {
 
     @Override
     public long save(Post post) {
-        String sql = "INSERT INTO posts(title, description, content, expires_at, created_at, last_renewed_at)" +
-                " values (?, ?, ?, ?, ?, ?);";
+        String sql = "INSERT INTO posts(title, description, content, expires_at, created_at) values (?, ?, ?, ?, ?);";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -52,7 +50,6 @@ public class SqlitePostDAO implements PostDao {
             ps.setString(3, post.getContent());
             ps.setString(4, formatter.format(post.getExpiresAt()));
             ps.setString(5, formatter.format(post.getCreatedAt()));
-            ps.setString(6, formatter.format(post.getLastRenewedAt()));
 
             int affectedRowsCount = ps.executeUpdate();
             if (affectedRowsCount == 0) {
@@ -75,7 +72,7 @@ public class SqlitePostDAO implements PostDao {
 
     @Override
     public boolean update(Post post) {
-        String sql = "UPDATE posts SET title=?, description=?, content=?, expires_at=?, created_at=?, last_renewed_at=? WHERE id=?;";
+        String sql = "UPDATE posts SET title=?, description=?, content=?, expires_at=?, created_at=? WHERE id=?;";
         try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -84,8 +81,7 @@ public class SqlitePostDAO implements PostDao {
             ps.setString(3, post.getContent());
             ps.setString(4, formatter.format(post.getExpiresAt()));
             ps.setString(5, formatter.format(post.getCreatedAt()));
-            ps.setString(6, formatter.format(post.getLastRenewedAt()));
-            ps.setLong(7, post.getId());
+            ps.setLong(6, post.getId());
 
             int affectedRowsCount = ps.executeUpdate();
             return affectedRowsCount == 1;

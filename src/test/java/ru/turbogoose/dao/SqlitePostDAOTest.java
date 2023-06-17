@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.models.Post;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -24,12 +23,9 @@ class SqlitePostDAOTest {
         post.setContent("Some content");
         post.setExpiresAt(now.plusDays(1));
         post.setCreatedAt(now);
-        post.setLastRenewedAt(now);
 
         long id = dao.save(post);
         assertEquals(post, dao.getById(id));
-
-        post.renew(Duration.of(10, ChronoUnit.DAYS));
 
         dao.update(post);
         assertEquals(post, dao.getById(id));
