@@ -1,32 +1,37 @@
 package ru.turbogoose.models;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Data
-@Builder
 public class Post {
     private long id;
-    @Builder.Default
-    private String title = ""; // add automatic generation here?
-    @Builder.Default
-    private String description = "";
+    private String title;
+    private String description;
     private String content;
-    @Builder.Default
-    private LocalDateTime expiresAt = LocalDateTime.now().plusDays(7);
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime expiresAt;
+    private LocalDateTime createdAt;
     private LocalDateTime lastRenewedAt;
 
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public void setLastRenewedAt(LocalDateTime lastRenewedAt) {
+        this.lastRenewedAt = lastRenewedAt.truncatedTo(ChronoUnit.SECONDS);
+    }
+
     public LocalDateTime renew(Duration duration) {
-        LocalDateTime updatedTimeToLive = expiresAt.plus(duration);
-        if (updatedTimeToLive.isAfter(expiresAt)) {
-            lastRenewedAt = LocalDateTime.now();
-            expiresAt = updatedTimeToLive;
-        }
+        LocalDateTime updatedExpirationTime = expiresAt.plus(duration);
+        setLastRenewedAt(LocalDateTime.now());
+        setExpiresAt(updatedExpirationTime);
         return expiresAt;
     }
 }

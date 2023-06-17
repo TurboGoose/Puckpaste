@@ -18,11 +18,11 @@ public class PostMapper {
     }
 
     public Post toPost(CreateDto dto) {
-        return Post.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .content(dto.getContent())
-                .expiresAt(LocalDateTime.now().plusDays(dto.getExpirationInDays()))
-                .build();
+        Post post = new Post();
+        post.setTitle(dto.getTitle());
+        post.setDescription(dto.getDescription());
+        post.setContent(dto.getContent());
+        post.setExpiresAt(LocalDateTime.now().plusDays(dto.getExpirationInDays()));
+        return post;
     }
 }

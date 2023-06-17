@@ -25,15 +25,15 @@ public class SqlitePostDAO implements PostDao {
                 throw new PostNotFoundException(id);
             }
 
-            return Post.builder()
-                    .id(rs.getLong("id"))
-                    .title(rs.getString("title"))
-                    .description(rs.getString("description"))
-                    .content(rs.getString("content"))
-                    .expiresAt(LocalDateTime.parse(rs.getString("expires_at"), formatter))
-                    .createdAt(LocalDateTime.parse(rs.getString("created_at"), formatter))
-                    .lastRenewedAt(LocalDateTime.parse(rs.getString("last_renewed_at"), formatter))
-                    .build();
+            Post post = new Post();
+            post.setId(rs.getLong("id"));
+            post.setTitle(rs.getString("title"));
+            post.setDescription(rs.getString("description"));
+            post.setContent(rs.getString("content"));
+            post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), formatter));
+            post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), formatter));
+            post.setLastRenewedAt(LocalDateTime.parse(rs.getString("last_renewed_at"), formatter));
+            return post;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -52,8 +52,7 @@ public class SqlitePostDAO implements PostDao {
             ps.setString(3, post.getContent());
             ps.setString(4, formatter.format(post.getExpiresAt()));
             ps.setString(5, formatter.format(post.getCreatedAt()));
-            ps.setString(6, post.getLastRenewedAt() == null
-                    ? null : formatter.format(post.getLastRenewedAt()));
+            ps.setString(6, formatter.format(post.getLastRenewedAt()));
 
             int affectedRowsCount = ps.executeUpdate();
             if (affectedRowsCount == 0) {
@@ -106,5 +105,4 @@ public class SqlitePostDAO implements PostDao {
             throw new RuntimeException(e);
         }
     }
-
 }

@@ -9,19 +9,22 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class SqlitePostDaoTest {
+class SqlitePostDAOTest {
     @Test
     public void testDAO() throws PostNotFoundException {
         PostDao dao = new SqlitePostDAO();
 
-        Post post = Post.builder()
-                .title("Title")
-                .description("Desc")
-                .content("Content")
-                .expiresAt(LocalDateTime.now().plusDays(1))
-                .createdAt(LocalDateTime.now())
-                .build();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+        Post post = new Post();
+        post.setTitle("Title");
+        post.setDescription("Desc");
+        post.setContent("Some content");
+        post.setExpiresAt(now.plusDays(1));
+        post.setCreatedAt(now);
+        post.setLastRenewedAt(now);
 
         long id = dao.save(post);
         assertEquals(post, dao.getById(id));
@@ -30,6 +33,9 @@ class SqlitePostDaoTest {
 
         dao.update(post);
         assertEquals(post, dao.getById(id));
+
+        dao.delete(id);
+        assertThrows(PostNotFoundException.class, () -> dao.getById(id));
     }
 
 }
