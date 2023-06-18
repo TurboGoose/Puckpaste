@@ -1,7 +1,7 @@
 package ru.turbogoose.services;
 
-import ru.turbogoose.dao.PostDAO;
-import ru.turbogoose.dto.CreateDto;
+import ru.turbogoose.dao.PostDao;
+import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.mappers.PostMapper;
@@ -9,14 +9,14 @@ import ru.turbogoose.models.Post;
 
 public class PostService {
     private final PostMapper mapper = new PostMapper();
-    private final PostDAO dao;
+    private final PostDao dao;
 
-    public PostService(PostDAO dao) {
+    public PostService(PostDao dao) {
         this.dao = dao;
     }
 
-    public PostDto createPost(CreateDto createDto) {
-        Post post = mapper.toPost(createDto);
+    public PostDto createPost(CreatePostDto createPostDto) {
+        Post post = mapper.toPost(createPostDto);
         dao.save(post);
         return mapper.toPostDto(post);
     }

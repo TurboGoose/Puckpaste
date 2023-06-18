@@ -8,15 +8,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
-public class SqlitePostDAO implements PostDAO {
+public class SqlitePostDao implements PostDao {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     private final String url;
 
-    public SqlitePostDAO(Properties props) {
+    public SqlitePostDao(Properties props) {
         this.url = props.getProperty("url");
     }
 
-    public SqlitePostDAO(String url) {
+    public SqlitePostDao(String url) {
         this.url = url;
     }
 
@@ -104,6 +104,21 @@ public class SqlitePostDAO implements PostDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public long getCount() {
+        String sql = "SELECT COUNT(*) FROM posts;";
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement ps = conn.createStatement()) {
+            ResultSet rs = ps.executeQuery(sql);
+            if (!rs.next()) {
+                throw new IllegalStateException("Cannot perform count operation on posts table");
+            }
+            return rs.getLong(1);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

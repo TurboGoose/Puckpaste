@@ -6,9 +6,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.turbogoose.dao.PostDAO;
-import ru.turbogoose.dao.SqlitePostDAO;
-import ru.turbogoose.dto.CreateDto;
+import ru.turbogoose.dao.PostDao;
+import ru.turbogoose.dao.SqlitePostDao;
+import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
@@ -29,10 +29,10 @@ public class PostServlet extends HttpServlet {
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
 
-        try {
+        try { // TODO: move this duplicated code to application startup logic
             Class.forName("org.sqlite.JDBC");
             Properties dbProps = PropertyReader.fromFile("database.properties");
-            PostDAO dao = new SqlitePostDAO(dbProps);
+            PostDao dao = new SqlitePostDao(dbProps);
             postService = new PostService(dao);
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -78,8 +78,8 @@ public class PostServlet extends HttpServlet {
         try (Writer writer = resp.getWriter()) {
             resp.setContentType("application/json");
             try {
-                CreateDto createDto = objectMapper.readValue(req.getReader(), CreateDto.class);
-                PostDto createdPostDto = postService.createPost(createDto);
+                CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);
+                PostDto createdPostDto = postService.createPost(createPostDto);
                 resp.setHeader("Location", generateLink(req, createdPostDto));
                 objectMapper.writeValue(writer, createdPostDto);
                 resp.setStatus(201);

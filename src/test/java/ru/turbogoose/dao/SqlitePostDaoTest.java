@@ -19,11 +19,11 @@ import java.time.temporal.ChronoUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class SqlitePostDAOTest {
+class SqlitePostDaoTest {
     @TempDir
     static Path tempDir;
     static String url;
-    PostDAO dao;
+    PostDao dao;
 
     @BeforeAll
     public static void initDb() throws SQLException, IOException {
@@ -35,7 +35,7 @@ class SqlitePostDAOTest {
 
     @BeforeEach
     public void initDao() {
-        dao = new SqlitePostDAO(url);
+        dao = new SqlitePostDao(url);
     }
 
     @AfterEach

@@ -3,7 +3,7 @@ package ru.turbogoose.dao;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.models.Post;
 
-public interface PostDAO {
+public interface PostDao {
     Post getById(long id) throws PostNotFoundException;
 
     long save(Post post);
@@ -11,4 +11,6 @@ public interface PostDAO {
     boolean update(Post post);
 
     void delete(long id);
+
+    long getCount();
 }
