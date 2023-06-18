@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 
 public class PostMapper {
     public PostDto toPostDto(Post post) {
-        return PostDto.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .description(post.getDescription())
-                .content(post.getContent())
-                .expiresAt(post.getExpiresAt())
-                .build();
+        PostDto postDto = new PostDto();
+        postDto.setId(post.getId());
+        postDto.setTitle(post.getTitle());
+        postDto.setDescription(post.getDescription());
+        postDto.setContent(post.getContent());
+        postDto.setExpiresAt(post.getExpiresAt());
+        return postDto;
     }
 
     public Post toPost(CreateDto dto) {
@@ -24,7 +24,7 @@ public class PostMapper {
         post.setDescription(dto.getDescription());
         post.setContent(dto.getContent());
         post.setCreatedAt(now);
-        post.setExpiresAt(now.plusDays(dto.getExpirationInDays()));
+        post.setExpiresAt(now.plusDays(dto.getExpirationTimeInDays()));
         return post;
     }
 }

@@ -22,10 +22,11 @@ public class PostService {
         dao.save(post);
         PostDto postDto = mapper.toPostDto(post);
         String link = LinkGenerator.getLink(post);
-        return CreatedPostDto.builder()
-                .post(postDto)
-                .link(link)
-                .build();
+
+        CreatedPostDto createdPostDto = new CreatedPostDto();
+        createdPostDto.setPost(postDto);
+        createdPostDto.setLink(link);
+        return createdPostDto;
     }
 
     public PostDto getPost(String id) throws PostNotFoundException {
