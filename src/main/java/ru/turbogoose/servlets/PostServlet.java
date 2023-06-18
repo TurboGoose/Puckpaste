@@ -23,15 +23,19 @@ import java.util.Properties;
 @WebServlet("/")
 public class PostServlet extends HttpServlet {
     private PostService postService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     @Override
     public void init() {
+        objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
         try {
+            Class.forName("org.sqlite.JDBC");
             Properties dbProps = PropertyReader.fromFile("database.properties");
             PostDAO dao = new SqlitePostDAO(dbProps);
             postService = new PostService(dao);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
@@ -39,14 +43,20 @@ public class PostServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         // TODO: add constraint validation
-        String id = extractId(req.getPathInfo());
         try (Writer writer = resp.getWriter()) {
             resp.setContentType("application/json");
+            String id = extractId(req.getServletPath()); // TODO: rewrite for matchers?
+            if (id == null) {
+                objectMapper.writeValue(writer, new ErrorDto("Resource not found"));
+                resp.setStatus(404);
+                return;
+            }
             try {
                 PostDto postDto = postService.getPost(id);
                 objectMapper.writeValue(writer, postDto);
                 resp.setStatus(200);
             } catch (PostNotFoundException | JacksonException exc) {
+                exc.printStackTrace();
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(404);
             }
@@ -57,7 +67,11 @@ public class PostServlet extends HttpServlet {
     }
 
     private String extractId(String path) {
-        return path.split("/")[1];
+        String[] split = path.split("/");
+        if (split.length == 2) {
+            return split[1];
+        }
+        return null;
     }
 
     @Override
@@ -70,6 +84,7 @@ public class PostServlet extends HttpServlet {
                 objectMapper.writeValue(writer, createdPostDto);
                 resp.setStatus(201);
             } catch (JacksonException exc) {
+                exc.printStackTrace();
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(400);
             }
