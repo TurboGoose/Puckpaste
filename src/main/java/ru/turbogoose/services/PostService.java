@@ -2,12 +2,10 @@ package ru.turbogoose.services;
 
 import ru.turbogoose.dao.PostDAO;
 import ru.turbogoose.dto.CreateDto;
-import ru.turbogoose.dto.CreatedPostDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.mappers.PostMapper;
 import ru.turbogoose.models.Post;
-import ru.turbogoose.utils.LinkGenerator;
 
 public class PostService {
     private final PostMapper mapper = new PostMapper();
@@ -17,16 +15,10 @@ public class PostService {
         this.dao = dao;
     }
 
-    public CreatedPostDto createPost(CreateDto createDto) {
+    public PostDto createPost(CreateDto createDto) {
         Post post = mapper.toPost(createDto);
         dao.save(post);
-        PostDto postDto = mapper.toPostDto(post);
-        String link = LinkGenerator.getLink(post);
-
-        CreatedPostDto createdPostDto = new CreatedPostDto();
-        createdPostDto.setPost(postDto);
-        createdPostDto.setLink(link);
-        return createdPostDto;
+        return mapper.toPostDto(post);
     }
 
     public PostDto getPost(String id) throws PostNotFoundException {

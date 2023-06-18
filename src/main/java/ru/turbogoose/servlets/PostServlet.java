@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dao.PostDAO;
 import ru.turbogoose.dao.SqlitePostDAO;
 import ru.turbogoose.dto.CreateDto;
-import ru.turbogoose.dto.CreatedPostDto;
 import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
@@ -80,7 +79,8 @@ public class PostServlet extends HttpServlet {
             resp.setContentType("application/json");
             try {
                 CreateDto createDto = objectMapper.readValue(req.getReader(), CreateDto.class);
-                CreatedPostDto createdPostDto = postService.createPost(createDto);
+                PostDto createdPostDto = postService.createPost(createDto);
+                resp.setHeader("Location", generateLink(req, createdPostDto));
                 objectMapper.writeValue(writer, createdPostDto);
                 resp.setStatus(201);
             } catch (JacksonException exc) {
@@ -92,5 +92,17 @@ public class PostServlet extends HttpServlet {
             throwable.printStackTrace();
             resp.setStatus(500);
         }
+    }
+
+    private String generateLink(HttpServletRequest req, PostDto post) {
+        String scheme = req.getScheme();
+        String server = req.getServerName();
+        int port = req.getServerPort();
+        long id = post.getId();
+
+        if (port == -1) {
+            return String.format("%s://%s/%d", scheme, server, id);
+        }
+        return String.format("%s://%s:%d/%d", scheme, server, port, id);
     }
 }
