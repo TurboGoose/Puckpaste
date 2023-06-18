@@ -1,5 +1,3 @@
--- DROP TABLE posts;
-
 CREATE TABLE IF NOT EXISTS posts
 (
     id          INTEGER PRIMARY KEY,
