@@ -6,14 +6,14 @@ import ru.turbogoose.models.Post;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 
 public class SqlitePostDAO implements PostDAO {
-    // TODO: rewrite to import from Properties
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     private final String url;
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
-    public SqlitePostDAO(String url) {
-        this.url = url;
+    public SqlitePostDAO(Properties props) {
+        this.url = props.getProperty("url");
     }
 
     @Override
@@ -33,8 +33,8 @@ public class SqlitePostDAO implements PostDAO {
             post.setTitle(rs.getString("title"));
             post.setDescription(rs.getString("description"));
             post.setContent(rs.getString("content"));
-            post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), formatter));
-            post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), formatter));
+            post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), FORMATTER));
+            post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), FORMATTER));
             return post;
 
         } catch (SQLException e) {
@@ -51,8 +51,8 @@ public class SqlitePostDAO implements PostDAO {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
             ps.setString(3, post.getContent());
-            ps.setString(4, formatter.format(post.getExpiresAt()));
-            ps.setString(5, formatter.format(post.getCreatedAt()));
+            ps.setString(4, FORMATTER.format(post.getExpiresAt()));
+            ps.setString(5, FORMATTER.format(post.getCreatedAt()));
 
             int affectedRowsCount = ps.executeUpdate();
             if (affectedRowsCount == 0) {
@@ -82,8 +82,8 @@ public class SqlitePostDAO implements PostDAO {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
             ps.setString(3, post.getContent());
-            ps.setString(4, formatter.format(post.getExpiresAt()));
-            ps.setString(5, formatter.format(post.getCreatedAt()));
+            ps.setString(4, FORMATTER.format(post.getExpiresAt()));
+            ps.setString(5, FORMATTER.format(post.getCreatedAt()));
             ps.setLong(6, post.getId());
 
             int affectedRowsCount = ps.executeUpdate();
