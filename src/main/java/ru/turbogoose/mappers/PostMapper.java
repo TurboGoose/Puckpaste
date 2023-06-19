@@ -1,7 +1,7 @@
 package ru.turbogoose.mappers;
 
 import ru.turbogoose.models.Post;
-import ru.turbogoose.dto.CreateDto;
+import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.PostDto;
 
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public class PostMapper {
         return postDto;
     }
 
-    public Post toPost(CreateDto dto) {
+    public Post toPost(CreatePostDto dto) {
         LocalDateTime now = LocalDateTime.now();
         Post post = new Post();
         post.setTitle(dto.getTitle());
