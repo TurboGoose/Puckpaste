@@ -7,17 +7,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dao.PostDao;
-import ru.turbogoose.dao.SqlitePostDao;
 import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.services.PostService;
-import ru.turbogoose.utils.PropertyReader;
 
-import java.io.IOException;
 import java.io.Writer;
-import java.util.Properties;
 
 @WebServlet("/")
 public class PostServlet extends HttpServlet {
@@ -26,17 +22,11 @@ public class PostServlet extends HttpServlet {
 
     @Override
     public void init() {
-        objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper(); // TODO: move to contextListener?
         objectMapper.findAndRegisterModules();
 
-        try { // TODO: move this duplicated code to application startup logic
-            Class.forName("org.sqlite.JDBC");
-            Properties dbProps = PropertyReader.fromFile("database.properties");
-            PostDao dao = new SqlitePostDao(dbProps);
-            postService = new PostService(dao);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        PostDao dao = (PostDao) getServletContext().getAttribute("dao");
+        postService = new PostService(dao);
     }
 
     @Override

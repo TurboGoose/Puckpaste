@@ -7,15 +7,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dao.PostDao;
-import ru.turbogoose.dao.SqlitePostDao;
 import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.StatisticsDto;
 import ru.turbogoose.services.StatisticsService;
-import ru.turbogoose.utils.PropertyReader;
 
-import java.io.IOException;
 import java.io.Writer;
-import java.util.Properties;
 
 @WebServlet("/stats")
 public class StatisticsServlet extends HttpServlet {
@@ -27,15 +23,8 @@ public class StatisticsServlet extends HttpServlet {
         objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
 
-        // TODO: move this duplicated code to application startup logic? (but it stateless, mb pohui?)
-        try {
-            Class.forName("org.sqlite.JDBC");
-            Properties dbProps = PropertyReader.fromFile("database.properties");
-            PostDao dao = new SqlitePostDao(dbProps);
-            statisticsService = new StatisticsService(dao);
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        PostDao dao = (PostDao) getServletContext().getAttribute("dao");
+        statisticsService = new StatisticsService(dao);
     }
 
     @Override
