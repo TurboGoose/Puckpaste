@@ -13,4 +13,6 @@ public interface PostDao {
     void delete(long id);
 
     long getCount();
+
+    int deleteExpired();
 }
