@@ -123,4 +123,10 @@ public class SqlitePostDao implements PostDao {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public int deleteExpired() {
+        System.out.println("Deletion triggered");
+        return 0;
+    }
 }

@@ -1,6 +1,9 @@
 package ru.turbogoose.services;
 
-import org.quartz.*;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import ru.turbogoose.dao.PostDao;
 
@@ -36,15 +39,5 @@ public class CleanupService {
 
     public void shutdown() throws SchedulerException {
         scheduler.shutdown();
-    }
-}
-
-class CleanupJob implements Job {
-    private PostDao dao;
-
-    @Override
-    public void execute(JobExecutionContext jobExecutionContext) {
-        jobExecutionContext.getJobDetail().getJobDataMap();
-        dao.deleteExpired();
     }
 }
