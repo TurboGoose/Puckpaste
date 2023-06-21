@@ -17,7 +17,7 @@ import ru.turbogoose.utils.PathMatcher;
 
 import java.io.Writer;
 
-@WebServlet("/")
+@WebServlet("/api/posts/*")
 public class PostServlet extends HttpServlet {
     private PostService postService;
     private ObjectMapper objectMapper;
@@ -35,7 +35,7 @@ public class PostServlet extends HttpServlet {
             resp.setContentType("application/json");
 
             PathMatcher pathMatcher = new PathMatcher("/{id}"); // TODO: move to separate function?
-            String path = req.getServletPath();
+            String path = req.getPathInfo();
             if (!pathMatcher.matches(path)) {
                 objectMapper.writeValue(writer, new ErrorDto("Resource not found"));
                 resp.setStatus(404);

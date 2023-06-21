@@ -13,7 +13,7 @@ import ru.turbogoose.services.StatisticsService;
 
 import java.io.Writer;
 
-@WebServlet("/stats")
+@WebServlet("/api/stats")
 public class StatisticsServlet extends HttpServlet {
     private StatisticsService statisticsService;
     private ObjectMapper objectMapper;
