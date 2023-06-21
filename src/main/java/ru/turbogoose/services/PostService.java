@@ -4,8 +4,10 @@ import ru.turbogoose.dao.PostDao;
 import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
+import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.mappers.PostMapper;
 import ru.turbogoose.models.Post;
+import ru.turbogoose.utils.FormatChecker;
 
 public class PostService {
     private final PostMapper mapper = new PostMapper();
@@ -21,7 +23,10 @@ public class PostService {
         return mapper.toPostDto(post);
     }
 
-    public PostDto getPost(String id) throws PostNotFoundException {
+    public PostDto getPost(String id) throws PostNotFoundException, ValidationException {
+        if (!FormatChecker.isLongParsable(id)) {
+            throw new ValidationException("Bad id format");
+        }
         Post post = dao.getById(Long.parseLong(id));
         return mapper.toPostDto(post);
     }

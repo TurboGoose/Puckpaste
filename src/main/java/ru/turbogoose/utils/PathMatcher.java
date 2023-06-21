@@ -1,5 +1,6 @@
 package ru.turbogoose.utils;
 
+import lombok.EqualsAndHashCode;
 import ru.turbogoose.exceptions.MismatchException;
 import ru.turbogoose.exceptions.PathMatcherException;
 
@@ -8,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+@EqualsAndHashCode
 public class PathMatcher {
     private final Set<String> pathVariables = new HashSet<>();
     private final Pattern pathPattern;
@@ -47,7 +49,7 @@ public class PathMatcher {
         Map<String, String> result = new HashMap<>();
         Matcher matcher = pathPattern.matcher(path);
         if (!matcher.matches()) {
-            throw new MismatchException(String.format("Path %s does not match to template %s", path, pathTemplate));
+            throw new MismatchException(String.format("Path %s does not match template %s", path, pathTemplate));
         }
         for (String variable : pathVariables) {
             result.put(variable, matcher.group(variable));

@@ -16,9 +16,13 @@ import ru.turbogoose.services.PostService;
 import ru.turbogoose.utils.PathMatcher;
 
 import java.io.Writer;
+import java.util.Map;
 
 @WebServlet("/api/posts/*")
 public class PostServlet extends HttpServlet {
+    private final Map<PathMatcher, PathHandler> PATH_MAPPINGS = Map.of(
+            new PathMatcher("/{id}"), this::handleGettingById
+    );
     private PostService postService;
     private ObjectMapper objectMapper;
 
@@ -31,23 +35,45 @@ public class PostServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        try (Writer writer = resp.getWriter()) {
-            resp.setContentType("application/json");
-
-            PathMatcher pathMatcher = new PathMatcher("/{id}"); // TODO: move to separate function?
-            String path = req.getPathInfo();
-            if (!pathMatcher.matches(path)) {
-                objectMapper.writeValue(writer, new ErrorDto("Resource not found"));
-                resp.setStatus(404);
+        String path = req.getPathInfo();
+        for (PathMatcher matcher : PATH_MAPPINGS.keySet()) {
+            if (matcher.matches(path)) {
+                PathHandler handler = PATH_MAPPINGS.get(matcher);
+                handler.handle(req, resp, matcher.extractVariables(path));
                 return;
             }
-            String id = pathMatcher.extractVariables(path).get("id");
+        }
 
+        returnErrorResponse(resp, 404, "Resource not found");
+    }
+
+    private void returnErrorResponse(HttpServletResponse resp, int status, String message) {
+        try (Writer writer = resp.getWriter()) {
+            if (message != null) {
+                resp.setContentType("application/json");
+                objectMapper.writeValue(writer, new ErrorDto(message));
+            }
+            resp.setStatus(status);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            resp.setStatus(500);
+        }
+    }
+
+    private void handleGettingById(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
+        String id = args.get("id");
+
+        try (Writer writer = resp.getWriter()) {
+            resp.setContentType("application/json");
             try {
                 PostDto postDto = postService.getPost(id);
                 objectMapper.writeValue(writer, postDto);
                 resp.setStatus(200);
-            } catch (PostNotFoundException | JacksonException exc) {
+            } catch (ValidationException | JacksonException exc) {
+                exc.printStackTrace();
+                objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
+                resp.setStatus(400);
+            } catch (PostNotFoundException exc) {
                 exc.printStackTrace();
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(404);
