@@ -11,6 +11,7 @@ import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
+import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
 
 import java.io.Writer;
@@ -34,7 +35,7 @@ public class PostServlet extends HttpServlet {
         // TODO: add constraint validation
         try (Writer writer = resp.getWriter()) {
             resp.setContentType("application/json");
-            String id = extractId(req.getServletPath()); // TODO: rewrite for matchers?
+            String id = extractId(req.getServletPath()); // TODO: rewrite for matchers
             if (id == null) {
                 objectMapper.writeValue(writer, new ErrorDto("Resource not found"));
                 resp.setStatus(404);
@@ -56,8 +57,9 @@ public class PostServlet extends HttpServlet {
     }
 
     private String extractId(String path) {
+
         String[] split = path.split("/");
-        if (split.length == 2) {
+        if (split.length >= 2) {
             return split[1];
         }
         return null;
@@ -69,11 +71,12 @@ public class PostServlet extends HttpServlet {
             resp.setContentType("application/json");
             try {
                 CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);
+                createPostDto.validate();
                 PostDto createdPostDto = postService.createPost(createPostDto);
                 resp.setHeader("Location", generateLink(req, createdPostDto));
                 objectMapper.writeValue(writer, createdPostDto);
                 resp.setStatus(201);
-            } catch (JacksonException exc) {
+            } catch (ValidationException | JacksonException exc) {
                 exc.printStackTrace();
                 objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(400);
