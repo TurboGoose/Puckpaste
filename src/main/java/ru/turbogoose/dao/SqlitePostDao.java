@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class SqlitePostDao implements PostDao {
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String url;
 
     public SqlitePostDao(Properties props) {
@@ -37,8 +37,8 @@ public class SqlitePostDao implements PostDao {
             post.setTitle(rs.getString("title"));
             post.setDescription(rs.getString("description"));
             post.setContent(rs.getString("content"));
-            post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), FORMATTER));
-            post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), FORMATTER));
+            post.setExpiresAt(LocalDateTime.parse(rs.getString("expires_at"), DATETIME_FORMATTER));
+            post.setCreatedAt(LocalDateTime.parse(rs.getString("created_at"), DATETIME_FORMATTER));
             return post;
 
         } catch (SQLException e) {
@@ -55,8 +55,8 @@ public class SqlitePostDao implements PostDao {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
             ps.setString(3, post.getContent());
-            ps.setString(4, FORMATTER.format(post.getExpiresAt()));
-            ps.setString(5, FORMATTER.format(post.getCreatedAt()));
+            ps.setString(4, DATETIME_FORMATTER.format(post.getExpiresAt()));
+            ps.setString(5, DATETIME_FORMATTER.format(post.getCreatedAt()));
 
             int affectedRowsCount = ps.executeUpdate();
             if (affectedRowsCount == 0) {
@@ -86,8 +86,8 @@ public class SqlitePostDao implements PostDao {
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getDescription());
             ps.setString(3, post.getContent());
-            ps.setString(4, FORMATTER.format(post.getExpiresAt()));
-            ps.setString(5, FORMATTER.format(post.getCreatedAt()));
+            ps.setString(4, DATETIME_FORMATTER.format(post.getExpiresAt()));
+            ps.setString(5, DATETIME_FORMATTER.format(post.getCreatedAt()));
             ps.setLong(6, post.getId());
 
             int affectedRowsCount = ps.executeUpdate();
@@ -126,7 +126,12 @@ public class SqlitePostDao implements PostDao {
 
     @Override
     public int deleteExpired() {
-        System.out.println("Deletion triggered");
-        return 0;
+        String sql = "DELETE FROM posts WHERE datetime(expires_at) <= datetime();";
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
