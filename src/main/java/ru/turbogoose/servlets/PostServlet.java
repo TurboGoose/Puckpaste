@@ -24,9 +24,7 @@ public class PostServlet extends HttpServlet {
 
     @Override
     public void init() {
-        objectMapper = new ObjectMapper(); // TODO: move to contextListener?
-        objectMapper.findAndRegisterModules();
-
+        objectMapper = (ObjectMapper) getServletContext().getAttribute("objectMapper");
         PostDao dao = (PostDao) getServletContext().getAttribute("dao");
         postService = new PostService(dao);
     }

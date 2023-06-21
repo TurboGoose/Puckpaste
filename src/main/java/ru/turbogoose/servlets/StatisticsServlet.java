@@ -20,9 +20,7 @@ public class StatisticsServlet extends HttpServlet {
 
     @Override
     public void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-
+        objectMapper = (ObjectMapper) getServletContext().getAttribute("objectMapper");
         PostDao dao = (PostDao) getServletContext().getAttribute("dao");
         statisticsService = new StatisticsService(dao);
     }
