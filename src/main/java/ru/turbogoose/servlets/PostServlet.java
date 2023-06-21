@@ -13,6 +13,7 @@ import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
+import ru.turbogoose.utils.PathMatcher;
 
 import java.io.Writer;
 
@@ -32,15 +33,18 @@ public class PostServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        // TODO: add constraint validation
         try (Writer writer = resp.getWriter()) {
             resp.setContentType("application/json");
-            String id = extractId(req.getServletPath()); // TODO: rewrite for matchers
-            if (id == null) {
+
+            PathMatcher pathMatcher = new PathMatcher("/{id}"); // TODO: move to separate function?
+            String path = req.getServletPath();
+            if (!pathMatcher.matches(path)) {
                 objectMapper.writeValue(writer, new ErrorDto("Resource not found"));
                 resp.setStatus(404);
                 return;
             }
+            String id = pathMatcher.extractVariables(path).get("id");
+
             try {
                 PostDto postDto = postService.getPost(id);
                 objectMapper.writeValue(writer, postDto);
@@ -54,15 +58,6 @@ public class PostServlet extends HttpServlet {
             throwable.printStackTrace();
             resp.setStatus(500);
         }
-    }
-
-    private String extractId(String path) {
-
-        String[] split = path.split("/");
-        if (split.length >= 2) {
-            return split[1];
-        }
-        return null;
     }
 
     @Override
