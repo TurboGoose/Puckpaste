@@ -1,4 +1,4 @@
-package ru.turbogoose.utils;
+package ru.turbogoose.testutils;
 
 import java.io.*;
 import java.sql.Connection;

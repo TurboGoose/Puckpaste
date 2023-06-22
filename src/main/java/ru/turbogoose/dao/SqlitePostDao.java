@@ -16,10 +16,6 @@ public class SqlitePostDao implements PostDao {
         this.url = props.getProperty("url");
     }
 
-    public SqlitePostDao(String url) {
-        this.url = url;
-    }
-
     @Override
     public Post getById(long id) throws PostNotFoundException {
         String sql = "SELECT * FROM posts WHERE id=?;";
