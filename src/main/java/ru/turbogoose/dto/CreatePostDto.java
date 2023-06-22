@@ -8,6 +8,7 @@ public class CreatePostDto {
     private static final int MAX_TITLE_LENGTH = 100; // TODO: move it to config + load to context in context listener
     private static final int MAX_DESCRIPTION_LENGTH = 1500;
     private static final int MAX_CONTENT_LENGTH = 20000;
+    private static final int MAX_LIFETIME_IN_DAYS = 30;
     
     private String title;
     private String description;
@@ -37,8 +38,13 @@ public class CreatePostDto {
                     getExpirationTimeInDays()));
         }
 
+        if (getExpirationTimeInDays() > MAX_LIFETIME_IN_DAYS) {
+            sb.append(String.format(" ExpirationTimeInDays must not exceed %d (got %d);",
+                    MAX_LIFETIME_IN_DAYS, getExpirationTimeInDays()));
+        }
+
         if (!sb.isEmpty()) {
-            throw new ValidationException("Post creation request failed validation due to following reasons:" + sb);
+            throw new ValidationException("Post creation request failed validation due to the following reasons:" + sb);
         }
     }
 }
