@@ -1,0 +1,32 @@
+POST http://localhost:8080/api/posts/
+Content-Type: application/json
+
+{
+  "title": "Post title",
+  "description": "Some description",
+  "content": "Some meaningful (not sure) code",
+  "expirationTimeInDays": 31
+}
+
+###
+
+POST http://localhost:8080/api/posts/
+Content-Type: application/json
+
+{
+  "title": "Post title",
+  "description": "Some description",
+  "content": "Some meaningful (not sure) code"
+  "expirationTimeInDays": 10
+}
+
+###
+
+GET http://localhost:8080/api/posts/1
+Accept: application/json
+
+###
+
+GET http://localhost:8080/bebra
+Accept: application/json
+
