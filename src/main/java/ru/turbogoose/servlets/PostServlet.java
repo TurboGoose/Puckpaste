@@ -15,7 +15,6 @@ import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
 import ru.turbogoose.utils.PathMatcher;
 
-import java.io.Writer;
 import java.util.Map;
 
 @WebServlet("/api/posts/*")
@@ -43,40 +42,20 @@ public class PostServlet extends HttpServlet {
                 return;
             }
         }
-
-        returnErrorResponse(resp, 404, "Resource not found");
-    }
-
-    private void returnErrorResponse(HttpServletResponse resp, int status, String message) {
-        try (Writer writer = resp.getWriter()) {
-            if (message != null) {
-                resp.setContentType("application/json");
-                objectMapper.writeValue(writer, new ErrorDto(message));
-            }
-            resp.setStatus(status);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            resp.setStatus(500);
-        }
     }
 
     private void handleGettingById(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
-        String id = args.get("id");
-
-        try (Writer writer = resp.getWriter()) {
-            resp.setContentType("application/json");
+        try {
             try {
+                String id = args.get("id");
                 PostDto postDto = postService.getPost(id);
-                objectMapper.writeValue(writer, postDto);
                 resp.setStatus(200);
-            } catch (ValidationException | JacksonException exc) {
-                exc.printStackTrace();
-                objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
+                resp.setContentType("application/json");
+                objectMapper.writeValue(resp.getWriter(), postDto);
+            } catch (ValidationException | PostNotFoundException exc) {
                 resp.setStatus(400);
-            } catch (PostNotFoundException exc) {
-                exc.printStackTrace();
-                objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
-                resp.setStatus(404);
+                resp.setContentType("application/json");
+                objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -86,19 +65,25 @@ public class PostServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        try (Writer writer = resp.getWriter()) {
-            resp.setContentType("application/json");
+        try {
             try {
                 CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);
                 createPostDto.validate();
                 PostDto createdPostDto = postService.createPost(createPostDto);
-                resp.setHeader("Location", generateLink(req, createdPostDto));
-                objectMapper.writeValue(writer, createdPostDto);
                 resp.setStatus(201);
-            } catch (ValidationException | JacksonException exc) {
+                resp.setContentType("application/json");
+                resp.setHeader("Location", generateLink(req, createdPostDto));
+                objectMapper.writeValue(resp.getWriter(), createdPostDto);
+            } catch (ValidationException exc) {
                 exc.printStackTrace();
-                objectMapper.writeValue(writer, new ErrorDto(exc.getMessage()));
                 resp.setStatus(400);
+                resp.setContentType("application/json");
+                objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));
+            } catch (JacksonException exc) {
+                exc.printStackTrace();
+                resp.setStatus(400);
+                resp.setContentType("application/json");
+                objectMapper.writeValue(resp.getWriter(), new ErrorDto("Invalid JSON format"));
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
