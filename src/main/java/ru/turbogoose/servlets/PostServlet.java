@@ -53,6 +53,7 @@ public class PostServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 objectMapper.writeValue(resp.getWriter(), postDto);
             } catch (ValidationException | PostNotFoundException exc) {
+                exc.printStackTrace();
                 resp.setStatus(400);
                 resp.setContentType("application/json");
                 objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));

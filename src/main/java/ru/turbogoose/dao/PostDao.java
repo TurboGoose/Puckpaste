@@ -8,10 +8,6 @@ public interface PostDao {
 
     long save(Post post);
 
-    boolean update(Post post);
-
-    void delete(long id);
-
     long getCount();
 
     int deleteExpired();

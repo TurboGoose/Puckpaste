@@ -5,19 +5,24 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.models.Post;
 import ru.turbogoose.testutils.SqlScriptRunner;
+import ru.turbogoose.utils.PostFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Properties;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SqlitePostDaoTest {
@@ -46,23 +51,64 @@ class SqlitePostDaoTest {
     }
 
     @Test
-    public void testDAO() throws PostNotFoundException {
-        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-
-        Post post = new Post();
-        post.setTitle("Title");
-        post.setDescription("Desc");
-        post.setContent("Some content");
-        post.setExpiresAt(now.plusDays(1));
-        post.setCreatedAt(now);
-
+    public void whenCreatePostAndGetByIdThenCreateAndReturn() throws PostNotFoundException {
+        Post post = PostFactory.getPostWithoutId();
         long id = dao.save(post);
-        assertEquals(post, dao.getById(id));
+        assertThat(post, is(dao.getById(id)));
+    }
 
-        dao.update(post);
-        assertEquals(post, dao.getById(id));
+    @Test
+    public void whenRetrievingPostByNonExistentIdThenThrow() {
+        assertThrows(PostNotFoundException.class, () -> dao.getById(55));
+    }
 
-        dao.delete(id);
-        assertThrows(PostNotFoundException.class, () -> dao.getById(id));
+    @ParameterizedTest
+    @MethodSource("getPostsWhichViolateConstraints")
+    public void whenCreatePostWithConstraintViolationThenThrow(Post post) {
+        assertThrows(RuntimeException.class, () -> dao.save(post));
+    }
+
+    private static Stream<Arguments> getPostsWhichViolateConstraints() {
+        Post tooLongTitle = PostFactory.getPostWithoutId();
+        tooLongTitle.setTitle("t".repeat(101));
+
+        Post tooLongDescription = PostFactory.getPostWithoutId();
+        tooLongDescription.setDescription("d".repeat(1501));
+
+        Post tooLongContent = PostFactory.getPostWithoutId();
+        tooLongContent.setContent("c".repeat(20001));
+
+        return Stream.of(
+                Arguments.of(tooLongTitle),
+                Arguments.of(tooLongDescription),
+                Arguments.of(tooLongContent)
+        );
+    }
+
+    @Test
+    public void whenGetPostCountThenReturnCount() {
+        assertThat(dao.getCount(), is(0L));
+        dao.save(PostFactory.getPostWithoutId());
+        dao.save(PostFactory.getPostWithoutId());
+        assertThat(dao.getCount(), is(2L));
+    }
+
+    @Test
+    public void whenDeleteExpiredPostsThenDeleteExpiredOnly() throws PostNotFoundException {
+        LocalDateTime now = LocalDateTime.now();
+
+        Post expired = PostFactory.getPostWithoutId();
+        expired.setExpiresAt(now.minusDays(1));
+
+
+        Post notExpired = PostFactory.getPostWithoutId();
+        notExpired.setExpiresAt(now.plusDays(1));
+
+        dao.save(expired);
+        dao.save(notExpired);
+
+        assertThat(dao.deleteExpired(), is(1));
+        assertThat(dao.getById(notExpired.getId()), is(notExpired));
+        assertThrows(PostNotFoundException.class, () -> dao.getById(expired.getId()));
     }
 }
