@@ -13,7 +13,8 @@ import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
-import ru.turbogoose.utils.PathMatcher;
+import ru.turbogoose.utils.path.PathHandler;
+import ru.turbogoose.utils.path.PathMatcher;
 
 import java.util.Map;
 
@@ -52,9 +53,9 @@ public class PostServlet extends HttpServlet {
                 resp.setStatus(200);
                 resp.setContentType("application/json");
                 objectMapper.writeValue(resp.getWriter(), postDto);
-            } catch (ValidationException | PostNotFoundException exc) {
+            } catch (PostNotFoundException exc) {
                 exc.printStackTrace();
-                resp.setStatus(400);
+                resp.setStatus(404);
                 resp.setContentType("application/json");
                 objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));
             }
