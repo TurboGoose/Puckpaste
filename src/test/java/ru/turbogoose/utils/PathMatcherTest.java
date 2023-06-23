@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ru.turbogoose.exceptions.MismatchException;
 import ru.turbogoose.exceptions.PathMatcherException;
+import ru.turbogoose.utils.path.PathMatcher;
 
 import java.util.Map;
 

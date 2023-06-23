@@ -1,4 +1,4 @@
-package ru.turbogoose.servlets;
+package ru.turbogoose.utils.path;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

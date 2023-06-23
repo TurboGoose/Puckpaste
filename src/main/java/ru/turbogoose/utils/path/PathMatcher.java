@@ -1,4 +1,4 @@
-package ru.turbogoose.utils;
+package ru.turbogoose.utils.path;
 
 import lombok.EqualsAndHashCode;
 import ru.turbogoose.exceptions.MismatchException;
