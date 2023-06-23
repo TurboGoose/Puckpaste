@@ -1,4 +1,4 @@
-package ru.turbogoose.services;
+package ru.turbogoose.quartzjobs;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;

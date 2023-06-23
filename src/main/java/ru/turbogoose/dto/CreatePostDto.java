@@ -5,7 +5,7 @@ import ru.turbogoose.exceptions.ValidationException;
 
 @Data
 public class CreatePostDto {
-    private static final int MAX_TITLE_LENGTH = 100; // TODO: move it to config + load to context in context listener
+    private static final int MAX_TITLE_LENGTH = 100;
     private static final int MAX_DESCRIPTION_LENGTH = 1500;
     private static final int MAX_CONTENT_LENGTH = 20000;
     private static final int MAX_LIFETIME_IN_DAYS = 30;

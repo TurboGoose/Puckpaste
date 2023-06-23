@@ -6,8 +6,8 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.quartz.SchedulerException;
+import ru.turbogoose.dao.DaoFactory;
 import ru.turbogoose.dao.PostDao;
-import ru.turbogoose.dao.SqlitePostDao;
 import ru.turbogoose.services.CleanupService;
 import ru.turbogoose.utils.PropertyReader;
 
@@ -23,7 +23,7 @@ public class ContextListener implements ServletContextListener {
         try {
             Class.forName("org.sqlite.JDBC");
             Properties dbProps = PropertyReader.fromFile("database.properties");
-            PostDao dao = new SqlitePostDao(dbProps); // TODO: replace for factory
+            PostDao dao = DaoFactory.getPostDao(dbProps);
 
             cleanupService = new CleanupService(dao);
             cleanupService.start();

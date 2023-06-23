@@ -6,6 +6,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import ru.turbogoose.dao.PostDao;
+import ru.turbogoose.quartzjobs.CleanupJob;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
