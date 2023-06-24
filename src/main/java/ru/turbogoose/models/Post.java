@@ -31,7 +31,6 @@ public class Post {
         }
     }
 
-    // TODO: rewrite object creation in tests
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt.truncatedTo(ChronoUnit.SECONDS);
     }

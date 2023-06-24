@@ -11,7 +11,7 @@ import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
-import ru.turbogoose.utils.PostValidator;
+import ru.turbogoose.services.PostValidator;
 import ru.turbogoose.utils.path.PathHandler;
 import ru.turbogoose.utils.path.PathMatcher;
 
