@@ -89,6 +89,26 @@ public class SqlitePostDao implements PostDao {
     }
 
     @Override
+    public boolean update(Post post) {
+        String sql = "UPDATE posts SET title=?, description=?, content=?, expires_at=?, created_at=? WHERE id=?;";
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getDescription());
+            ps.setString(3, post.getContent());
+            ps.setString(4, DATETIME_FORMATTER.format(post.getExpiresAt()));
+            ps.setString(5, DATETIME_FORMATTER.format(post.getCreatedAt()));
+            ps.setLong(6, post.getId());
+
+            int affectedRowsCount = ps.executeUpdate();
+            return affectedRowsCount == 1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public int deleteExpired() {
         String sql = "DELETE FROM posts WHERE datetime(expires_at) <= datetime();";
         try (Connection conn = DriverManager.getConnection(url);

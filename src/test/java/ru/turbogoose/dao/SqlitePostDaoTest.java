@@ -94,6 +94,30 @@ class SqlitePostDaoTest {
     }
 
     @Test
+    public void whenUpdatePostWithExistentIdThenUpdateAndReturnTrue() throws PostNotFoundException {
+        Post post = PostFactory.getPostWithoutId();
+        dao.save(post);
+
+        LocalDateTime now = LocalDateTime.now();
+        post.setTitle("New title");
+        post.setDescription("New desc");
+        post.setContent("New content");
+        post.setCreatedAt(now.plusDays(1));
+        post.setExpiresAt(now.plusDays(3));
+        assertThat(dao.update(post), is(true));
+
+        Post updated = dao.getById(post.getId());
+        assertThat(updated, is(post));
+    }
+
+    @Test
+    public void whenUpdatePostWithNonExistentIdThenReturnFalse() {
+        Post post = PostFactory.getPostWithoutId();
+        post.setId(1000L);
+        assertThat(dao.update(post), is(false));
+    }
+
+    @Test
     public void whenDeleteExpiredPostsThenDeleteExpiredOnly() throws PostNotFoundException {
         LocalDateTime now = LocalDateTime.now();
 

@@ -9,6 +9,7 @@ public interface PostDao {
     long save(Post post);
 
     long getCount();
+    boolean update(Post post);
 
     int deleteExpired();
 }
