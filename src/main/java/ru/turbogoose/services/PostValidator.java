@@ -1,4 +1,4 @@
-package ru.turbogoose.utils;
+package ru.turbogoose.services;
 
 import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.exceptions.ValidationException;
