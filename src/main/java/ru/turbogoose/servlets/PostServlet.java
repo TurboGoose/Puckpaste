@@ -1,14 +1,12 @@
 package ru.turbogoose.servlets;
 
 import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dao.PostDao;
 import ru.turbogoose.dto.CreatePostDto;
-import ru.turbogoose.dto.ErrorDto;
 import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
@@ -19,16 +17,15 @@ import ru.turbogoose.utils.path.PathMatcher;
 import java.util.Map;
 
 @WebServlet("/api/posts/*")
-public class PostServlet extends HttpServlet {
+public class PostServlet extends CustomHttpServlet {
     private final Map<PathMatcher, PathHandler> PATH_MAPPINGS = Map.of(
             new PathMatcher("/{id}"), this::handleGettingById
     );
     private PostService postService;
-    private ObjectMapper objectMapper;
 
     @Override
-    public void init() {
-        objectMapper = (ObjectMapper) getServletContext().getAttribute("objectMapper");
+    public void init() throws ServletException {
+        super.init();
         PostDao dao = (PostDao) getServletContext().getAttribute("dao");
         postService = new PostService(dao);
     }
@@ -55,9 +52,7 @@ public class PostServlet extends HttpServlet {
                 objectMapper.writeValue(resp.getWriter(), postDto);
             } catch (PostNotFoundException exc) {
                 exc.printStackTrace();
-                resp.setStatus(404);
-                resp.setContentType("application/json");
-                objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));
+                sendErrorMessageWithCode(resp, 404, exc.getMessage());
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -78,14 +73,10 @@ public class PostServlet extends HttpServlet {
                 objectMapper.writeValue(resp.getWriter(), createdPostDto);
             } catch (ValidationException exc) {
                 exc.printStackTrace();
-                resp.setStatus(400);
-                resp.setContentType("application/json");
-                objectMapper.writeValue(resp.getWriter(), new ErrorDto(exc.getMessage()));
+                sendErrorMessageWithCode(resp, 400, exc.getMessage());
             } catch (JacksonException exc) {
                 exc.printStackTrace();
-                resp.setStatus(400);
-                resp.setContentType("application/json");
-                objectMapper.writeValue(resp.getWriter(), new ErrorDto("Invalid JSON format"));
+                sendErrorMessageWithCode(resp, 400, "Invalid JSON syntax");
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -96,12 +87,13 @@ public class PostServlet extends HttpServlet {
     private String generateLink(HttpServletRequest req, PostDto post) {
         String scheme = req.getScheme();
         String server = req.getServerName();
+        String path = req.getServletPath();
         int port = req.getServerPort();
         long id = post.getId();
 
         if (port == -1) {
-            return String.format("%s://%s/%d", scheme, server, id);
+            return String.format("%s://%s%s/%d", scheme, server, path, id);
         }
-        return String.format("%s://%s:%d/%d", scheme, server, port, id);
+        return String.format("%s://%s:%d%s/%d", scheme, server, port, path, id);
     }
 }
