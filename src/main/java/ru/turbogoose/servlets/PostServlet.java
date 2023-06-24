@@ -11,6 +11,7 @@ import ru.turbogoose.dto.PostDto;
 import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
+import ru.turbogoose.utils.PostValidator;
 import ru.turbogoose.utils.path.PathHandler;
 import ru.turbogoose.utils.path.PathMatcher;
 
@@ -65,7 +66,7 @@ public class PostServlet extends CustomHttpServlet {
         try {
             try {
                 CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);
-                createPostDto.validate();
+                PostValidator.validate(createPostDto);
                 PostDto createdPostDto = postService.createPost(createPostDto);
                 resp.setStatus(201);
                 resp.setContentType("application/json");

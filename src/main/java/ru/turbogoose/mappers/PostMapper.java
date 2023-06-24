@@ -1,10 +1,8 @@
 package ru.turbogoose.mappers;
 
-import ru.turbogoose.models.Post;
 import ru.turbogoose.dto.CreatePostDto;
 import ru.turbogoose.dto.PostDto;
-
-import java.time.LocalDateTime;
+import ru.turbogoose.models.Post;
 
 public class PostMapper {
     public PostDto toPostDto(Post post) {
@@ -18,13 +16,11 @@ public class PostMapper {
     }
 
     public Post toPost(CreatePostDto dto) {
-        LocalDateTime now = LocalDateTime.now();
         Post post = new Post();
         post.setTitle(dto.getTitle());
         post.setDescription(dto.getDescription());
         post.setContent(dto.getContent());
-        post.setCreatedAt(now);
-        post.setExpiresAt(now.plusDays(dto.getExpirationTimeInDays()));
+        post.setExpiresAt(dto.getExpirationTimeInDays());
         return post;
     }
 }

@@ -17,6 +17,16 @@ Content-Type: application/json
   "content": "Some meaningful (not sure) code"
 }
 
+### post with missing required field
+POST http://localhost:8080/api/posts/
+Content-Type: application/json
+
+{
+  "title": "Post title",
+  "description": "Some description",
+  "expirationTimeInDays": 10
+}
+
 ### post with constraint violation
 POST http://localhost:8080/api/posts/
 Content-Type: application/json
