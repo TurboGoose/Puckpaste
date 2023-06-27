@@ -25,7 +25,7 @@ public class StatisticsServlet extends CustomHttpServlet {
             StatisticsDto statisticsDto = statisticsService.getTotalPostCount();
             resp.setStatus(200);
             resp.setContentType("application/json");
-            objectMapper.writeValue(resp.getWriter(), statisticsDto);
+            jsonMapper.serialize(resp.getWriter(), statisticsDto);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             resp.setStatus(500);

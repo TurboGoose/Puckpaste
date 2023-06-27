@@ -1,6 +1,5 @@
 package ru.turbogoose.listeners;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -30,10 +29,6 @@ public class ContextListener implements ServletContextListener {
 
             ServletContext context = sce.getServletContext();
             context.setAttribute("dao", dao);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.findAndRegisterModules();
-            context.setAttribute("objectMapper", objectMapper);
         } catch (IOException | ClassNotFoundException | SchedulerException e) {
             throw new RuntimeException(e);
         }

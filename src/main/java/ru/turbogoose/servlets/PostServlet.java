@@ -1,6 +1,5 @@
 package ru.turbogoose.servlets;
 
-import com.fasterxml.jackson.core.JacksonException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,7 +56,7 @@ public class PostServlet extends CustomHttpServlet {
                 PostDto postDto = postService.getPost(id);
                 resp.setStatus(200);
                 resp.setContentType("application/json");
-                objectMapper.writeValue(resp.getWriter(), postDto);
+                jsonMapper.serialize(resp.getWriter(), postDto);
             } catch (PostNotFoundException exc) {
                 exc.printStackTrace();
                 sendErrorMessageWithCode(resp, 404, exc.getMessage());
@@ -85,17 +84,17 @@ public class PostServlet extends CustomHttpServlet {
     private void handlePostCreation(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
         try {
             try {
-                CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);
+                CreatePostDto createPostDto = jsonMapper.deserialize(req.getReader(), CreatePostDto.class);
                 PostValidator.validate(createPostDto);
                 PostDto createdPostDto = postService.createPost(createPostDto);
                 resp.setStatus(201);
                 resp.setContentType("application/json");
                 resp.setHeader("Location", generateLink(req, createdPostDto));
-                objectMapper.writeValue(resp.getWriter(), createdPostDto);
+                jsonMapper.serialize(resp.getWriter(), createdPostDto);
             } catch (ValidationException exc) {
                 exc.printStackTrace();
                 sendErrorMessageWithCode(resp, 400, exc.getMessage());
-            } catch (JacksonException exc) {
+            } catch (IOException exc) {
                 exc.printStackTrace();
                 sendErrorMessageWithCode(resp, 400, "Invalid JSON syntax");
             }
