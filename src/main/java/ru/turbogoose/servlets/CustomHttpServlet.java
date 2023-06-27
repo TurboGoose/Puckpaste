@@ -9,7 +9,7 @@ import ru.turbogoose.dto.ErrorDto;
 import java.io.IOException;
 
 public class CustomHttpServlet extends HttpServlet {
-    protected ObjectMapper objectMapper;
+    protected ObjectMapper objectMapper; // TODO: move to factory
 
     @Override
     public void init() throws ServletException {

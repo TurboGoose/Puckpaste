@@ -15,12 +15,18 @@ import ru.turbogoose.services.PostValidator;
 import ru.turbogoose.utils.path.PathHandler;
 import ru.turbogoose.utils.path.PathMatcher;
 
+import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/api/posts/*")
+@WebServlet("/posts/*")
 public class PostServlet extends CustomHttpServlet {
-    private final Map<PathMatcher, PathHandler> PATH_MAPPINGS = Map.of(
-            new PathMatcher("/{id}"), this::handleGettingById
+    // TODO: move this mapping logic to superclass
+    private final Map<PathMatcher, PathHandler> GET_MAPPINGS = Map.of(
+            new PathMatcher("/{id}"), this::handlePostRetrieving
+    );
+
+    private final Map<PathMatcher, PathHandler> POST_MAPPINGS = Map.of(
+            new PathMatcher("/"), this::handlePostCreation
     );
     private PostService postService;
 
@@ -32,18 +38,19 @@ public class PostServlet extends CustomHttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
-        for (PathMatcher matcher : PATH_MAPPINGS.keySet()) {
+        for (PathMatcher matcher : GET_MAPPINGS.keySet()) {
             if (matcher.matches(path)) {
-                PathHandler handler = PATH_MAPPINGS.get(matcher);
+                PathHandler handler = GET_MAPPINGS.get(matcher);
                 handler.handle(req, resp, matcher.extractVariables(path));
                 return;
             }
         }
+        sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getServletPath() + path);
     }
 
-    private void handleGettingById(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
+    private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
         try {
             try {
                 String id = args.get("id");
@@ -62,7 +69,20 @@ public class PostServlet extends CustomHttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String path = req.getPathInfo();
+        for (PathMatcher matcher : POST_MAPPINGS.keySet()) {
+            if (matcher.matches(path)) {
+                PathHandler handler = POST_MAPPINGS.get(matcher);
+                handler.handle(req, resp, matcher.extractVariables(path));
+                return;
+            }
+
+            sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getServletPath() + path);
+        }
+    }
+
+    private void handlePostCreation(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
         try {
             try {
                 CreatePostDto createPostDto = objectMapper.readValue(req.getReader(), CreatePostDto.class);

@@ -8,7 +8,7 @@ import ru.turbogoose.dao.PostDao;
 import ru.turbogoose.dto.StatisticsDto;
 import ru.turbogoose.services.StatisticsService;
 
-@WebServlet("/api/stats")
+@WebServlet("/stats")
 public class StatisticsServlet extends CustomHttpServlet {
     private StatisticsService statisticsService;
 

@@ -1,5 +1,16 @@
 ### correct post
-POST http://localhost:8080/api/posts/
+POST http://localhost:8080/posts/
+Content-Type: application/json
+
+{
+  "title": "Post title",
+  "description": "Some description",
+  "content": "Some meaningful (not sure) code",
+  "expirationTimeInDays": 10
+}
+
+### post to undefined subresource
+POST http://localhost:8080/posts/bebra
 Content-Type: application/json
 
 {
@@ -10,7 +21,7 @@ Content-Type: application/json
 }
 
 ### post without optional fields
-POST http://localhost:8080/api/posts/
+POST http://localhost:8080/posts/
 Content-Type: application/json
 
 {
@@ -18,7 +29,7 @@ Content-Type: application/json
 }
 
 ### post with missing required field
-POST http://localhost:8080/api/posts/
+POST http://localhost:8080/posts/
 Content-Type: application/json
 
 {
@@ -28,7 +39,7 @@ Content-Type: application/json
 }
 
 ### post with constraint violation
-POST http://localhost:8080/api/posts/
+POST http://localhost:8080/posts/
 Content-Type: application/json
 
 {
@@ -39,7 +50,7 @@ Content-Type: application/json
 }
 
 ### post with incorrect json
-POST http://localhost:8080/api/posts/
+POST http://localhost:8080/posts/
 Content-Type: application/json
 
 {
@@ -50,23 +61,27 @@ Content-Type: application/json
 }
 
 ### get for existent post
-GET http://localhost:8080/api/posts/1
+GET http://localhost:8080/posts/1
 Accept: application/json
 
 ### get for non-existent post
-GET http://localhost:8080/api/posts/100
+GET http://localhost:8080/posts/100
 Accept: application/json
 
 ### get with incorrect id format
-GET http://localhost:8080/api/posts/abc
+GET http://localhost:8080/posts/abc
 Accept: application/json
 
 
 ### get statistics
-GET http://localhost:8080/api/stats
+GET http://localhost:8080/stats
 Accept: application/json
 
 
 ### get for undefined page
 GET http://localhost:8080/bebra
+Accept: application/json
+
+### get for undefined subresource
+GET http://localhost:8080/posts/1/bebra
 Accept: application/json
