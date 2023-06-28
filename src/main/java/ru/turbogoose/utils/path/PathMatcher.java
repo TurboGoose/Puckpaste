@@ -11,19 +11,28 @@ import java.util.regex.PatternSyntaxException;
 
 @EqualsAndHashCode
 public class PathMatcher {
+    public static final PathMatcher EXACT_MATCHER = new PathMatcher(null);
     private final Set<String> pathVariables = new HashSet<>();
     private final Pattern pathPattern;
-    private final String pathTemplate;
+    private final String pathTemplate; // must starts with "/" and follow camelCase (underscores not allowed) or be null
 
     public PathMatcher(String pathTemplate) {
-        if (pathTemplate == null || pathTemplate.isBlank()) {
-            throw new PathMatcherException(String.format("Illegal path template: %s", pathTemplate));
-        }
         this.pathTemplate = pathTemplate;
-        pathPattern = pathTemplateToPattern(pathTemplate);
+        validateTemplate();
+        pathPattern = pathTemplateToPattern();
     }
 
-    private Pattern pathTemplateToPattern(String pathTemplate) {
+    private void validateTemplate() {
+        if (pathTemplate != null && !pathTemplate.startsWith("/")) {
+            throw new PathMatcherException(
+                    String.format("Path template must starts with '/', but got %s instead", pathTemplate));
+        }
+    }
+
+    private Pattern pathTemplateToPattern() {
+        if (pathTemplate == null) {
+            return null;
+        }
         try {
             Pattern pattern = Pattern.compile("\\{(.+?)}");
             Matcher matcher = pattern.matcher(pathTemplate);
@@ -42,11 +51,22 @@ public class PathMatcher {
     }
 
     public boolean matches(String path) {
-        return path != null && pathPattern.matcher(path).matches();
+        if (pathPattern == null) {
+            return path == null;
+        }
+        return pathPattern.matcher(path).matches();
     }
 
     public Map<String, String> extractVariables(String path) {
         Map<String, String> result = new HashMap<>();
+
+        if (pathPattern == null) {
+            if (path != null) {
+                throw new MismatchException(String.format("Path %s does not match template %s", path, pathTemplate));
+            }
+            return result;
+        }
+
         Matcher matcher = pathPattern.matcher(path);
         if (!matcher.matches()) {
             throw new MismatchException(String.format("Path %s does not match template %s", path, pathTemplate));
