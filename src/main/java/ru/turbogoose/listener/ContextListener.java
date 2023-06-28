@@ -11,17 +11,19 @@ import ru.turbogoose.service.CleanupService;
 import ru.turbogoose.util.PropertyReader;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 @WebListener
 public class ContextListener implements ServletContextListener {
+    private static final String envProfile = Optional.ofNullable(System.getenv("PUCKPASTE_ENV")).orElse("dev");
     private CleanupService cleanupService;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
             Class.forName("org.sqlite.JDBC");
-            Properties dbProps = PropertyReader.fromFile("database.properties");
+            Properties dbProps = PropertyReader.fromFile(envProfile + "/application.properties");
             PostDao dao = DaoFactory.getPostDao(dbProps);
 
             cleanupService = new CleanupService(dao);
