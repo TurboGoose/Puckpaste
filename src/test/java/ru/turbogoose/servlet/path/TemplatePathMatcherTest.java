@@ -1,12 +1,11 @@
-package ru.turbogoose.util;
+package ru.turbogoose.servlet.path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import ru.turbogoose.exception.MismatchException;
 import ru.turbogoose.exception.PathMatcherException;
-import ru.turbogoose.servlet.path.PathMatcher;
 
 import java.util.Map;
 
@@ -15,19 +14,20 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PathMatcherTest {
+class TemplatePathMatcherTest {
     @ParameterizedTest
+    @NullAndEmptySource
     @ValueSource(strings = {
-            "", "orders/{id}", "/orders/{id", "/orders/{order_id}", "{/orders/id}"
+            "orders/{id}", "/orders/{id", "/orders/{order_id}", "{/orders/id}"
     })
     public void whenPassIncorrectPatternThenThrow(String incorrectPathTemplate) {
-        assertThrows(PathMatcherException.class, () -> new PathMatcher(incorrectPathTemplate));
+        assertThrows(PathMatcherException.class, () -> new TemplatePathMatcher(incorrectPathTemplate));
     }
 
     @Test
     public void whenCallExtractWithoutMatchCallOnMatchedStringThenReturnMapWithVariables() {
         String template = "/orders/{orderId}/items/{itemId}";
-        PathMatcher pathMatcher = new PathMatcher(template);
+        TemplatePathMatcher pathMatcher = new TemplatePathMatcher(template);
         String testPath = "/orders/11/items/a1b2c3";
         Map<String, String> vars = pathMatcher.extractVariables(testPath);
         assertThat(vars.get("orderId"), is("11"));
@@ -37,7 +37,7 @@ class PathMatcherTest {
     @Test
     public void whenCallExtractWithoutMatchOnMismatchedStringThenThrow() {
         String template = "/orders/{orderId}/items/{itemId}";
-        PathMatcher pathMatcher = new PathMatcher(template);
+        TemplatePathMatcher pathMatcher = new TemplatePathMatcher(template);
         String testPath = "/orders/11";
         assertThrows(MismatchException.class, () -> pathMatcher.extractVariables(testPath));
     }
@@ -45,7 +45,7 @@ class PathMatcherTest {
     @Test
     public void whenCallMatchAndExtractOnMatchedStringThenReturnMapWithVariables() {
         String template = "/orders/{orderId}/items/{itemId}";
-        PathMatcher pathMatcher = new PathMatcher(template);
+        TemplatePathMatcher pathMatcher = new TemplatePathMatcher(template);
         String testPath = "/orders/11/items/a1b2c3";
         assertTrue(pathMatcher.matches(testPath));
         Map<String, String> vars = pathMatcher.extractVariables(testPath);
@@ -56,7 +56,7 @@ class PathMatcherTest {
     @ParameterizedTest
     @ValueSource(strings = {"/orders", "/orders/items"})
     public void whenPassPatternWithoutParametersThenMatchExactSameStringAndExtractEmptyMap(String template) {
-        PathMatcher matcher = new PathMatcher(template);
+        TemplatePathMatcher matcher = new TemplatePathMatcher(template);
 
         assertThat(matcher.matches(template), is(true));
         assertThat(matcher.extractVariables(template).size(), is(0));
@@ -65,20 +65,12 @@ class PathMatcherTest {
         assertThat(matcher.matches("/hello" + template), is(false));
     }
 
-    @Test
-    public void whenPassNullPatternThenMatchNullAndExtractEmptyMap() {
-        PathMatcher matcher = new PathMatcher(null);
-
-        assertThat(matcher.matches(null), is(true));
-        assertThat(matcher.extractVariables(null).size(), is(0));
-    }
-
     @ParameterizedTest
-    @EmptySource
+    @NullAndEmptySource
     @ValueSource(strings = {"/", "/orders", "orders/1/items/", "/orders/1/items/4/barcodes"})
     public void whenMatchingUnsuccessfulThenThrow(String mismatchedPath) {
         String template = "/orders/{orderId}/items/{itemId}";
-        PathMatcher pathMatcher = new PathMatcher(template);
+        TemplatePathMatcher pathMatcher = new TemplatePathMatcher(template);
         assertThat(pathMatcher.matches(mismatchedPath), is(false));
     }
 }

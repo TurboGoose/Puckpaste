@@ -11,7 +11,7 @@ import ru.turbogoose.exception.PostNotFoundException;
 import ru.turbogoose.exception.ValidationException;
 import ru.turbogoose.service.PostService;
 import ru.turbogoose.service.PostValidator;
-import ru.turbogoose.servlet.path.PathMatcher;
+import ru.turbogoose.servlet.path.TemplatePathMatcher;
 
 import java.io.IOException;
 import java.util.Map;
@@ -26,8 +26,8 @@ public class PostServlet extends JsonServlet {
         PostDao dao = (PostDao) getServletContext().getAttribute("dao");
         postService = new PostService(dao);
 
-        addGetMapping(new PathMatcher("/{id}"), this::handlePostRetrieving);
-        addPostMapping(new PathMatcher("/"), this::handlePostCreation);
+        addGetMapping(new TemplatePathMatcher("/{id}"), this::handlePostRetrieving);
+        addPostMapping(new TemplatePathMatcher("/"), this::handlePostCreation);
     }
 
     private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args)
