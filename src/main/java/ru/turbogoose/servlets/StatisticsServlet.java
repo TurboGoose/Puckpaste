@@ -9,7 +9,7 @@ import ru.turbogoose.dto.StatisticsDto;
 import ru.turbogoose.services.StatisticsService;
 
 @WebServlet("/stats")
-public class StatisticsServlet extends CustomHttpServlet {
+public class StatisticsServlet extends JsonServlet {
     private StatisticsService statisticsService;
 
     @Override

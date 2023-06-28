@@ -11,22 +11,13 @@ import ru.turbogoose.exceptions.PostNotFoundException;
 import ru.turbogoose.exceptions.ValidationException;
 import ru.turbogoose.services.PostService;
 import ru.turbogoose.services.PostValidator;
-import ru.turbogoose.utils.path.PathHandler;
 import ru.turbogoose.utils.path.PathMatcher;
 
 import java.io.IOException;
 import java.util.Map;
 
 @WebServlet("/posts/*")
-public class PostServlet extends CustomHttpServlet {
-    // TODO: move this mapping logic to superclass
-    private final Map<PathMatcher, PathHandler> GET_MAPPINGS = Map.of(
-            new PathMatcher("/{id}"), this::handlePostRetrieving
-    );
-
-    private final Map<PathMatcher, PathHandler> POST_MAPPINGS = Map.of(
-            new PathMatcher("/"), this::handlePostCreation
-    );
+public class PostServlet extends JsonServlet {
     private PostService postService;
 
     @Override
@@ -34,73 +25,41 @@ public class PostServlet extends CustomHttpServlet {
         super.init();
         PostDao dao = (PostDao) getServletContext().getAttribute("dao");
         postService = new PostService(dao);
+
+        addGetMapping(new PathMatcher("/{id}"), this::handlePostRetrieving);
+        addPostMapping(new PathMatcher("/"), this::handlePostCreation);
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getPathInfo();
-        for (PathMatcher matcher : GET_MAPPINGS.keySet()) {
-            if (matcher.matches(path)) {
-                PathHandler handler = GET_MAPPINGS.get(matcher);
-                handler.handle(req, resp, matcher.extractVariables(path));
-                return;
-            }
-        }
-        sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getServletPath() + path);
-    }
-
-    private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
+    private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args)
+            throws IOException {
         try {
-            try {
-                String id = args.get("id");
-                PostDto postDto = postService.getPost(id);
-                resp.setStatus(200);
-                resp.setContentType("application/json");
-                jsonMapper.serialize(resp.getWriter(), postDto);
-            } catch (PostNotFoundException exc) {
-                exc.printStackTrace();
-                sendErrorMessageWithCode(resp, 404, exc.getMessage());
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            resp.setStatus(500);
+            String id = args.get("id");
+            PostDto postDto = postService.getPost(id);
+            resp.setStatus(200);
+            resp.setContentType("application/json");
+            jsonMapper.serialize(resp.getWriter(), postDto);
+        } catch (PostNotFoundException exc) {
+            exc.printStackTrace();
+            sendErrorMessageWithCode(resp, 404, exc.getMessage());
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getPathInfo();
-        for (PathMatcher matcher : POST_MAPPINGS.keySet()) {
-            if (matcher.matches(path)) {
-                PathHandler handler = POST_MAPPINGS.get(matcher);
-                handler.handle(req, resp, matcher.extractVariables(path));
-                return;
-            }
-
-            sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getServletPath() + path);
-        }
-    }
-
-    private void handlePostCreation(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) {
+    private void handlePostCreation(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args)
+            throws IOException {
         try {
-            try {
-                CreatePostDto createPostDto = jsonMapper.deserialize(req.getReader(), CreatePostDto.class);
-                PostValidator.validate(createPostDto);
-                PostDto createdPostDto = postService.createPost(createPostDto);
-                resp.setStatus(201);
-                resp.setContentType("application/json");
-                resp.setHeader("Location", generateLink(req, createdPostDto));
-                jsonMapper.serialize(resp.getWriter(), createdPostDto);
-            } catch (ValidationException exc) {
-                exc.printStackTrace();
-                sendErrorMessageWithCode(resp, 400, exc.getMessage());
-            } catch (IOException exc) {
-                exc.printStackTrace();
-                sendErrorMessageWithCode(resp, 400, "Invalid JSON syntax");
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            resp.setStatus(500);
+            CreatePostDto createPostDto = jsonMapper.deserialize(req.getReader(), CreatePostDto.class);
+            PostValidator.validate(createPostDto);
+            PostDto createdPostDto = postService.createPost(createPostDto);
+            resp.setStatus(201);
+            resp.setContentType("application/json");
+            resp.setHeader("Location", generateLink(req, createdPostDto));
+            jsonMapper.serialize(resp.getWriter(), createdPostDto);
+        } catch (ValidationException exc) {
+            exc.printStackTrace();
+            sendErrorMessageWithCode(resp, 400, exc.getMessage());
+        } catch (IOException exc) {
+            exc.printStackTrace();
+            sendErrorMessageWithCode(resp, 400, "Invalid JSON syntax");
         }
     }
 

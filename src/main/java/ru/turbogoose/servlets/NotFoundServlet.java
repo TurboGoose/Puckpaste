@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/*")
-public class NotFoundServlet extends CustomHttpServlet {
+public class NotFoundServlet extends JsonServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         processNotFoundError(req, resp);
