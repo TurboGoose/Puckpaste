@@ -1,7 +1,7 @@
 package ru.turbogoose.dao;
 
-import ru.turbogoose.exceptions.PostNotFoundException;
-import ru.turbogoose.models.Post;
+import ru.turbogoose.exception.PostNotFoundException;
+import ru.turbogoose.model.Post;
 
 import java.sql.*;
 import java.time.LocalDateTime;

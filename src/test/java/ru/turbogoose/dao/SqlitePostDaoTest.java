@@ -8,10 +8,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ru.turbogoose.exceptions.PostNotFoundException;
-import ru.turbogoose.models.Post;
-import ru.turbogoose.testutils.SqlScriptRunner;
-import ru.turbogoose.utils.PostFactory;
+import ru.turbogoose.exception.PostNotFoundException;
+import ru.turbogoose.model.Post;
+import ru.turbogoose.testutil.SqlScriptRunner;
+import ru.turbogoose.testutil.PostFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
