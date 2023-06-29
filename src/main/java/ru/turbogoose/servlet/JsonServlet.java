@@ -1,5 +1,6 @@
 package ru.turbogoose.servlet;
 
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@WebServlet("/*")
 public class JsonServlet extends HttpServlet {
     protected final JsonMapper jsonMapper = JsonMapperFactory.getMapper();
     private final Map<PathMatcher, PathHandler> getMappings = new HashMap<>();
@@ -46,8 +48,8 @@ public class JsonServlet extends HttpServlet {
                     handler.handle(req, resp, matcher.extractVariables(path));
                     return;
                 }
-                sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getServletPath() + path);
             }
+            sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getRequestURI());
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             resp.setStatus(500);

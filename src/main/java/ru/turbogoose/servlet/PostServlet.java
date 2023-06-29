@@ -11,12 +11,13 @@ import ru.turbogoose.exception.PostNotFoundException;
 import ru.turbogoose.exception.ValidationException;
 import ru.turbogoose.service.PostService;
 import ru.turbogoose.service.PostValidator;
+import ru.turbogoose.servlet.path.ExactPathMatcher;
 import ru.turbogoose.servlet.path.TemplatePathMatcher;
 
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/posts/*")
+@WebServlet(urlPatterns = {"/posts", "/posts/*"})
 public class PostServlet extends JsonServlet {
     private PostService postService;
 
@@ -27,7 +28,7 @@ public class PostServlet extends JsonServlet {
         postService = new PostService(dao);
 
         addGetMapping(new TemplatePathMatcher("/{id}"), this::handlePostRetrieving);
-        addPostMapping(new TemplatePathMatcher("/"), this::handlePostCreation);
+        addPostMapping(new ExactPathMatcher(), this::handlePostCreation);
     }
 
     private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args)

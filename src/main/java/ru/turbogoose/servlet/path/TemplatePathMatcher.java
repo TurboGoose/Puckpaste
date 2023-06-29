@@ -57,6 +57,9 @@ public class TemplatePathMatcher implements PathMatcher {
 
     public Map<String, String> extractVariables(String path) {
         Map<String, String> result = new HashMap<>();
+        if (path == null) {
+            throw new MismatchException(String.format("Null pass does not match template %s", pathTemplate));
+        }
         Matcher matcher = pathPattern.matcher(path);
         if (!matcher.matches()) {
             throw new MismatchException(String.format("Path %s does not match template %s", path, pathTemplate));
