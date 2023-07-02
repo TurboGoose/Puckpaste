@@ -1,11 +1,10 @@
 package ru.turbogoose.listener;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.quartz.SchedulerException;
-import ru.turbogoose.dao.DaoFactory;
+import ru.turbogoose.dao.DaoSingletonFactory;
 import ru.turbogoose.dao.PostDao;
 import ru.turbogoose.service.CleanupService;
 import ru.turbogoose.util.PropertyReader;
@@ -24,13 +23,10 @@ public class ContextListener implements ServletContextListener {
         try {
             Class.forName("org.sqlite.JDBC");
             Properties dbProps = PropertyReader.fromFile(envProfile + "/application.properties");
-            PostDao dao = DaoFactory.getPostDao(dbProps);
-
+            DaoSingletonFactory.init(dbProps);
+            PostDao dao = DaoSingletonFactory.getInstance();
             cleanupService = new CleanupService(dao);
             cleanupService.start();
-
-            ServletContext context = sce.getServletContext();
-            context.setAttribute("dao", dao);
         } catch (IOException | ClassNotFoundException | SchedulerException e) {
             throw new RuntimeException(e);
         }
