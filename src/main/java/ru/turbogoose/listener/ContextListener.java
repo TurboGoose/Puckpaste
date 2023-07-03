@@ -10,12 +10,12 @@ import ru.turbogoose.service.CleanupService;
 import ru.turbogoose.util.PropertyReader;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Properties;
 
 @WebListener
 public class ContextListener implements ServletContextListener {
     private static final String ENV_PROFILE = "ENV_PROFILE";
+    private enum Profile {dev, prod}
     private CleanupService cleanupService;
 
     @Override
@@ -23,8 +23,7 @@ public class ContextListener implements ServletContextListener {
         try {
             Class.forName("org.sqlite.JDBC");
 
-            String sysEnv = System.getenv(ENV_PROFILE);
-            String profile = Optional.ofNullable(sysEnv).orElse("dev");
+            Profile profile = getProfileFromEnv();
             Properties dbProps = PropertyReader.fromFile(profile + "/application.properties");
 
             DaoSingletonFactory.init(dbProps);
@@ -35,6 +34,17 @@ public class ContextListener implements ServletContextListener {
         } catch (IOException | ClassNotFoundException | SchedulerException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Profile getProfileFromEnv() {
+        Profile profile = Profile.dev;
+        String sysEnv = System.getenv(ENV_PROFILE);
+        if (sysEnv != null) {
+            try {
+                profile = Profile.valueOf(sysEnv.toLowerCase());
+            } catch (IllegalArgumentException ignore) {}
+        }
+        return profile;
     }
 
     @Override
