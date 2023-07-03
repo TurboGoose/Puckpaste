@@ -15,16 +15,21 @@ import java.util.Properties;
 
 @WebListener
 public class ContextListener implements ServletContextListener {
-    private static final String envProfile = Optional.ofNullable(System.getenv("PUCKPASTE_ENV")).orElse("dev");
+    private static final String ENV_PROFILE = "ENV_PROFILE";
     private CleanupService cleanupService;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
             Class.forName("org.sqlite.JDBC");
-            Properties dbProps = PropertyReader.fromFile(envProfile + "/application.properties");
+
+            String sysEnv = System.getenv(ENV_PROFILE);
+            String profile = Optional.ofNullable(sysEnv).orElse("dev");
+            Properties dbProps = PropertyReader.fromFile(profile + "/application.properties");
+
             DaoSingletonFactory.init(dbProps);
             PostDao dao = DaoSingletonFactory.getInstance();
+
             cleanupService = new CleanupService(dao);
             cleanupService.start();
         } catch (IOException | ClassNotFoundException | SchedulerException e) {

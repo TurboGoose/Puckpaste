@@ -1,6 +1,5 @@
 package ru.turbogoose.servlet;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,23 +17,19 @@ public class PostServlet extends JsonServlet {
     private final PostService postService = new PostService(DaoSingletonFactory.getInstance());
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         super.init();
-
-        addGetMapping(new TemplatePathMatcher("/{id}"), this::handlePostRetrieving);
+        addMapping(HttpMethod.GET, new TemplatePathMatcher("/{id}"), this::handlePostRetrieval);
     }
 
-    private void handlePostRetrieving(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args)
-            throws IOException {
+    private void handlePostRetrieval(HttpServletRequest req, HttpServletResponse resp, Map<String, String> args) throws IOException {
         try {
             String id = args.get("id");
             PostDto postDto = postService.getPost(id);
-            resp.setStatus(200);
-            resp.setContentType("application/json");
-            jsonMapper.serialize(resp.getWriter(), postDto);
+            sendResponse(resp, 200, postDto);
         } catch (PostNotFoundException exc) {
             exc.printStackTrace();
-            sendErrorMessageWithCode(resp, 404, exc.getMessage());
+            sendError(resp, 404, exc.getMessage());
         }
     }
 }

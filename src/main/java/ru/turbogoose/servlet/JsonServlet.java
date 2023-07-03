@@ -1,64 +1,39 @@
 package ru.turbogoose.servlet;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.turbogoose.dto.ErrorDto;
+import ru.turbogoose.exception.PathMappingNotFoundException;
 import ru.turbogoose.json.JsonMapper;
-import ru.turbogoose.json.JsonMapperFactory;
-import ru.turbogoose.servlet.path.PathHandler;
-import ru.turbogoose.servlet.path.PathMatcher;
+import ru.turbogoose.json.JsonMapperSingletonFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @WebServlet("/*")
-public class JsonServlet extends HttpServlet {
-    protected final JsonMapper jsonMapper = JsonMapperFactory.getMapper();
-    private final Map<PathMatcher, PathHandler> getMappings = new HashMap<>();
-    private final Map<PathMatcher, PathHandler> postMappings = new HashMap<>();
-
-    public void addGetMapping(PathMatcher matcher, PathHandler handler) {
-        getMappings.put(matcher, handler);
-    }
-
-    public void addPostMapping(PathMatcher matcher, PathHandler handler) {
-        postMappings.put(matcher, handler);
-    }
-
+public class JsonServlet extends DispatcherServlet {
+    protected final JsonMapper jsonMapper = JsonMapperSingletonFactory.getInstance();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        performMapping(getMappings, req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        performMapping(postMappings, req, resp);
-    }
-
-    private void performMapping(Map<PathMatcher, PathHandler> mappings, HttpServletRequest req, HttpServletResponse resp) {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String path = req.getPathInfo();
-            for (PathMatcher matcher : mappings.keySet()) {
-                if (matcher.matches(path)) {
-                    PathHandler handler = mappings.get(matcher);
-                    handler.handle(req, resp, matcher.extractVariables(path));
-                    return;
-                }
-            }
-            sendErrorMessageWithCode(resp, 404, "Resource not found " + req.getRequestURI());
+            super.service(req, resp);
+        } catch (PathMappingNotFoundException exc) {
+            sendError(resp, 404, exc.getMessage());
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             resp.setStatus(500);
         }
     }
 
-    protected void sendErrorMessageWithCode(HttpServletResponse resp, int code, String message) throws IOException {
+    protected void sendResponse(HttpServletResponse resp, int code, Object obj) throws IOException {
         resp.setStatus(code);
         resp.setContentType("application/json");
-        jsonMapper.serialize(resp.getWriter(), new ErrorDto(message));
+        jsonMapper.serialize(resp.getWriter(), obj);
+    }
+
+    protected void sendError(HttpServletResponse resp, int code, String message) throws IOException {
+        sendResponse(resp, code, new ErrorDto(message));
     }
 }

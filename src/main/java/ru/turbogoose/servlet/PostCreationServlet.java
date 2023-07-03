@@ -22,16 +22,14 @@ public class PostCreationServlet extends JsonServlet {
             CreatePostDto createPostDto = jsonMapper.deserialize(req.getReader(), CreatePostDto.class);
             PostValidator.validate(createPostDto);
             PostDto createdPostDto = postService.createPost(createPostDto);
-            resp.setStatus(201);
-            resp.setContentType("application/json");
             resp.setHeader("Location", generateLink(req, createdPostDto));
-            jsonMapper.serialize(resp.getWriter(), createdPostDto);
+            sendResponse(resp, 201, createdPostDto);
         } catch (ValidationException exc) {
             exc.printStackTrace();
-            sendErrorMessageWithCode(resp, 400, exc.getMessage());
+            sendError(resp, 400, exc.getMessage());
         } catch (IOException exc) {
             exc.printStackTrace();
-            sendErrorMessageWithCode(resp, 400, "Invalid JSON syntax");
+            sendError(resp, 400, "Invalid JSON syntax");
         }
     }
 
